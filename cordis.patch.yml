@@ -1,0 +1,7 @@
+# dsh-gui-control —— GUI 控制（强刷 / 重启）。
+#
+# 插入一个 Loader 条目，加载包的 node 半侧（lib/index.js）。node 半侧只提供
+# 只读状态 RPC；客户端入口由 dsh.client（package.json）声明，浏览器侧单独加载。
+- insert:
+    - id: dsh-gui-control
+      name: dsh-gui-control

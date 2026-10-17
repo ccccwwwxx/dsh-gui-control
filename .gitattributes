@@ -1,0 +1,3 @@
+# Keep the shipped bundle byte-identical across platforms: `npm run verify`
+# compares a fresh build against lib/client.js, which is written with LF only.
+* text=auto eol=lf

@@ -1,0 +1,52 @@
+{
+  "name": "dsh-gui-control",
+  "version": "0.1.1",
+  "description": "DSH GUI 控制：一键强刷界面、重启 Harness（侧边栏底部入口 + 设置页状态面板）。",
+  "license": "MIT",
+  "author": "ccccwwwxx",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js"
+  },
+  "files": [
+    "lib",
+    "src",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ccccwwwxx/dsh-gui-control.git"
+  },
+  "homepage": "https://github.com/ccccwwwxx/dsh-gui-control#readme",
+  "bugs": {
+    "url": "https://github.com/ccccwwwxx/dsh-gui-control/issues"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "gui",
+    "hard-refresh",
+    "restart"
+  ],
+  "scripts": {
+    "build": "node src/build-client.mjs",
+    "check": "node --check lib/index.js && node --check lib/client.js && node --check lib/text.js",
+    "verify": "node scripts/verify.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-locale"
+      ]
+    }
+  }
+}
