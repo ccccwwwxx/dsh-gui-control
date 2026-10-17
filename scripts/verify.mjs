@@ -134,21 +134,36 @@ const fakeCtx = {
 
 exportsObject.apply(fakeCtx)
 
-assert.equal(registrations.length, 3, 'expected 2 footer entries + 1 settings section')
+assert.equal(registrations.length, 5, 'expected 2 header entries + 2 footer entries + 1 settings section')
 const byId = new Map(registrations.map((item) => [item.definition.id, item]))
-for (const id of ['gui-control-refresh', 'gui-control-restart', 'gui-control']) {
+for (const id of [
+  'gui-control-header-refresh',
+  'gui-control-header-restart',
+  'gui-control-refresh',
+  'gui-control-restart',
+  'gui-control',
+]) {
   assert.ok(byId.has(id), `missing slot registration: ${id}`)
 }
+const headerRefresh = byId.get('gui-control-header-refresh')
+const headerRestart = byId.get('gui-control-header-restart')
 const refresh = byId.get('gui-control-refresh')
 const restart = byId.get('gui-control-restart')
 const section = byId.get('gui-control')
+
+assert.equal(headerRefresh.definition.name, 'conversation.session.header.utilities')
+assert.equal(headerRestart.definition.name, 'conversation.session.header.utilities')
 assert.equal(refresh.definition.name, 'sidebar.footer.action')
 assert.equal(restart.definition.name, 'sidebar.footer.action')
 assert.equal(section.definition.name, 'settings.section')
+
+// 会话头的两个图标按钮必须排在官方那三个按钮左侧（open-in-app = -10，会话日志「更多」= 0）。
+assert.ok(headerRefresh.definition.order < headerRestart.definition.order, 'refresh left of restart')
+assert.ok(headerRestart.definition.order < -10, 'header entries must sit left of the shipped utilities')
 assert.ok(refresh.definition.order < restart.definition.order, 'refresh should come before restart')
 assert.equal(typeof section.definition.label, 'function')
 assert.equal(section.definition.label(), '界面控制')
-ok('apply() registers 2 sidebar.footer.action entries + settings.section')
+ok('apply() registers 2 header utilities, 2 footer actions and 1 settings section')
 
 // ---------- 4. 组件渲染（宽 / 窄） ----------
 
@@ -246,6 +261,21 @@ for (const expected of ['界面控制（强刷 / 重启）', '当前运行状态
 assert.ok(sectionText.includes('状态读取失败') || sectionText.includes('读取中'), 'settings should show a loading/error state')
 ok('settings section renders title, status placeholder and both actions')
 
+// 会话头：图标按钮没有文字，语义全在 aria-label / title 上。
+const headerRefreshView = mount(headerRefresh.Component, props)
+const headerRefreshElement = headerRefreshView.render()
+const headerRefreshButton = findButton(headerRefreshElement)
+assert.ok(headerRefreshButton, 'header refresh button not found')
+assert.equal(headerRefreshButton.props['aria-label'], '强刷界面')
+assert.ok(String(headerRefreshButton.props.className).includes('dsh-gui-icon-btn'))
+assert.equal(headerRefreshButton.children.length, 1, 'header refresh must stay icon-only')
+const headerRestartView = mount(headerRestart.Component, props)
+const headerRestartButton = findButton(headerRestartView.render())
+assert.ok(headerRestartButton, 'header restart button not found')
+assert.equal(headerRestartButton.props['aria-label'], '重启 Harness')
+assert.ok(String(headerRestartButton.props.className).includes('dsh-gui-gap-after'), 'restart carries the 8px gap')
+ok('header entries render icon-only buttons with aria labels')
+
 // ---------- 5. 强刷动作 ----------
 
 let reloads = 0
@@ -274,6 +304,17 @@ assert.equal(unregistered, 1, 'service worker must be unregistered')
 assert.equal(reloads, 1, 'location.reload must be called')
 ok('hard refresh clears caches, unregisters service workers and reloads')
 
+// 会话头入口跑的是同一个动作，不能有第二套实现。
+cleared = []
+reloads = 0
+unregistered = 0
+const headerReloadView = mount(headerRefresh.Component, props)
+await findButton(headerReloadView.render()).props.onClick()
+assert.deepEqual(cleared, ['a', 'b'], 'header refresh must clear caches too')
+assert.equal(reloads, 1, 'header refresh must reload')
+assert.equal(unregistered, 1, 'header refresh must unregister service workers')
+ok('header refresh runs the same hard refresh')
+
 // ---------- 6. 重启两步确认 ----------
 
 let restarts = 0
@@ -292,12 +333,30 @@ await restartButton.props.onClick()
 assert.equal(restarts, 1, 'second click must call the desktop restart bridge')
 ok('restart requires a second click and then calls window.dshDesktop.restartHarness')
 
+// 会话头入口：同样的两步确认，第二次点击才重启。
+const headerRestartClick = mount(headerRestart.Component, props)
+let headerRendered = headerRestartClick.render()
+let headerButton = findButton(headerRendered)
+assert.equal(headerButton.props.disabled, false, 'header restart must be enabled with the bridge')
+await headerButton.props.onClick()
+assert.equal(restarts, 1, 'header first click must only arm')
+headerRendered = headerRestartClick.render()
+assert.equal(findButton(headerRendered).props['data-armed'], 'true', 'armed state must be visible')
+assert.ok(textOf(headerRendered).includes('再点一次确认重启'), 'armed hint must be shown')
+await findButton(headerRendered).props.onClick()
+assert.equal(restarts, 2, 'header second click must restart')
+ok('header restart uses the same two-step confirmation')
+
 // 非桌面端：禁用 + 说明原因。
 delete sandbox.dshDesktop
 const browserView = mount(restart.Component, { ...props, wide: true })
 const browserButton = findButton(browserView.render())
 assert.equal(browserButton.props.disabled, true, 'restart must be disabled without the desktop bridge')
 assert.ok(String(browserButton.props.title).includes('DSH Desktop'), 'disabled restart should explain why')
+const headerBrowserView = mount(headerRestart.Component, props)
+const headerBrowserButton = findButton(headerBrowserView.render())
+assert.equal(headerBrowserButton.props.disabled, true, 'header restart must be disabled without the bridge')
+assert.ok(String(headerBrowserButton.props.title).includes('DSH Desktop'), 'header restart should explain why')
 ok('restart is disabled with an explanation outside DSH Desktop')
 
 // ---------- 7. 文案与包声明 ----------

@@ -1,6 +1,6 @@
 {
   "name": "dsh-gui-control",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "DSH GUI 控制：一键强刷界面、重启 Harness（侧边栏底部入口 + 设置页状态面板）。",
   "license": "MIT",
   "author": "ccccwwwxx",

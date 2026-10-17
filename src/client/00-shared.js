@@ -156,6 +156,23 @@ const CSS = [
   '.dsh-gui-note{font-size:12px;line-height:18px;color:var(--dsw-alias-label-tertiary,#888);margin:0}',
   '.dsh-gui-error{font-size:12px;line-height:18px;color:var(--dsw-alias-state-error-primary,#e5484d);margin:0;overflow-wrap:anywhere}',
   '.dsh-gui-explain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary,inherit)}',
+  // ---- 会话头右上角（15-header.js）----
+  // 24px 图标按钮，几何对齐同排官方按钮：height 24、radius sm、hover 用 interactive-bg-hover。
+  '.dsh-gui-icon-slot{position:relative;flex:none;display:inline-flex;align-items:center}',
+  '.dsh-gui-icon-btn{box-sizing:border-box;flex:none;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;padding:0;border:0;border-radius:var(--dsw-radius-sm,6px);background:transparent;color:var(--dsw-alias-label-secondary,inherit);cursor:pointer}',
+  '.dsh-gui-icon-btn:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover,rgba(127,127,127,.14));color:var(--dsw-alias-label-primary,inherit)}',
+  '.dsh-gui-icon-btn:focus-visible{outline:2px solid var(--dsw-alias-state-business-primary,#4c8dff);outline-offset:1px}',
+  '.dsh-gui-icon-btn:disabled{opacity:.45;cursor:default}',
+  '.dsh-gui-icon-btn[data-tone="danger"]{color:var(--dsw-alias-state-error-primary,#e5484d)}',
+  '.dsh-gui-icon-btn[data-armed="true"]{box-shadow:inset 0 0 0 1px currentColor;background:rgba(229,72,77,.12)}',
+  // "隔开一点点"：这一对按钮中最右的那个与同排三个官方按钮之间多留 8px（容器本身 gap 8px）。
+  '.dsh-gui-icon-btn.dsh-gui-gap-after{margin-right:8px}',
+  '@keyframes dsh-gui-spin{to{transform:rotate(360deg)}}',
+  '.dsh-gui-icon-btn[data-spin="true"] svg{animation:dsh-gui-spin .9s linear infinite}',
+  '@media (prefers-reduced-motion:reduce){.dsh-gui-icon-btn[data-spin="true"] svg{animation:none}}',
+  // 武装 / 失败提示：绝对定位在按钮下方，不占布局、不推动这一排。
+  '.dsh-gui-header-hint{position:absolute;top:calc(100% + 6px);right:0;z-index:20;pointer-events:none;white-space:nowrap;font-size:11px;line-height:16px;padding:3px 8px;border-radius:8px;border:.5px solid var(--dsw-alias-border-l3,rgba(127,127,127,.45));background:var(--dsw-alias-bg-layer-1,#fff);color:var(--dsw-alias-label-primary,inherit);box-shadow:0 6px 18px rgba(0,0,0,.14)}',
+  '.dsh-gui-header-hint[data-tone="danger"]{border-color:var(--dsw-alias-state-error-primary,#e5484d);color:var(--dsw-alias-state-error-primary,#e5484d)}',
 ].join('\n')
 
 // 注入样式；ctx.effect 负责卸载时移除。document 不存在（SSR / 测试环境）时静默跳过。

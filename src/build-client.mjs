@@ -17,10 +17,11 @@ import { dirname, join, resolve } from 'node:path'
 const here = dirname(fileURLToPath(import.meta.url))
 const root = join(here, '..')
 
-// 顺序即拼接顺序：共享层 → 入口组件 → 设置页 → apply。
+// 顺序即拼接顺序：共享层 → 侧边栏入口 → 会话头入口 → 设置页 → apply。
 const ORDER = [
   '00-shared.js',
   '10-footer.js',
+  '15-header.js',
   '20-settings.js',
   '90-apply.js',
 ]
